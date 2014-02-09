@@ -1,0 +1,28 @@
+extends layout
+
+append css
+  style(type='text/css', media='screen').
+    #editor {
+      position: relative; /* must be relative */
+    }
+
+    .deletion {
+      position: absolute; /* must be absolute */
+      background-color: #f7c8c8;
+    }
+
+    .addition {
+      position: absolute; /* must be absolute */
+      background-color: #ceffce;
+    }
+
+block content
+  .container
+    #editor
+
+append js
+  script.
+    require(['lib/compare', 'bootstrap'], function(compare) {
+      window.grading = window.grading || {};
+      window.grading.compare = compare.exec;
+    });

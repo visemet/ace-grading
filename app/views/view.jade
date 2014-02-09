@@ -1,0 +1,18 @@
+extends layout
+
+append css
+  style(type='text/css', media='screen').
+    #editor {
+      position: relative; /* must be relative */
+    }
+
+block content
+  .container
+    #editor
+
+append js
+  script.
+    require(['lib/view', 'bootstrap'], function(view) {
+      window.grading = window.grading || {};
+      window.grading.view = view.exec;
+    });

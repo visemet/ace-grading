@@ -1,0 +1,29 @@
+doctype html
+html
+  head
+    title= title
+
+    block css
+      link(rel='stylesheet', href='/css/bootstrap-3.1.0.min.css')
+      link(rel='stylesheet', href='/css/bootstrap-theme-3.1.0.min.css')
+      link(rel='stylesheet', href='/css/spacer.css')
+  body
+    include header
+
+    block content
+
+    include footer
+
+    block js
+      script(src='/js/vendor/require-2.1.10/require.min.js')
+      script.
+        require.config({
+          baseUrl: '/js',
+          paths: {
+            jquery: '//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min',
+            bootstrap: 'vendor/bootstrap-3.1.0/bootstrap.min'
+          },
+          shim: {
+            'bootstrap': ['jquery']
+          }
+        });
