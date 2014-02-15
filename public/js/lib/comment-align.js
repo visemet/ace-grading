@@ -27,6 +27,8 @@ define(function(require, exports, module) {
       , currentTop = parseInt($comment.css('top'), 10);
 
     $comment.css('top', preferredTop);
+    $comment.show();
+
     return (!$.isNumeric(currentTop) || preferredTop !== currentTop);
   };
 
@@ -47,6 +49,12 @@ define(function(require, exports, module) {
       // Move comment down as far as possible, or much as preferred
       extent = Math.min(preferredTop, extent - $c.height() - PADDING);
       $c.css('top', extent);
+
+      if (extent < 0) {
+        $c.hide();
+      } else {
+        $c.show();
+      }
     }
   };
 
@@ -67,6 +75,8 @@ define(function(require, exports, module) {
       // Move comment up as far as possible, or much as preferred
       extent = Math.max(preferredTop, extent + $prev.height() + PADDING);
       $c.css('top', extent);
+      $c.show();
+
       $prev = $c;
     }
   };
