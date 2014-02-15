@@ -1,0 +1,17 @@
+
+.comment-box {
+  position: absolute; /* must be absolute */
+}
+
+.comment-box-highlighted {
+  background-color: #ffe572;
+}
+
+.comment-code {
+  position: absolute; /* must be absolute */
+  background-color: #fcfac6;
+}
+
+.comment-code-highlighted {
+  background-color: #ffe168;
+}

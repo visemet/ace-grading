@@ -4,11 +4,20 @@ append css
   style(type='text/css', media='screen').
     #editor {
       position: relative; /* must be relative */
+      height: 450px;
+    }
+
+    #comments {
+      position: relative; /* must be relative */
+      height: 450px;
     }
 
 block content
   .container
-    #editor
+    .col-xs-8
+      #editor
+    .col-xs-4
+      #comments
 
 append js
   script.
@@ -16,3 +25,4 @@ append js
       window.grading = window.grading || {};
       window.grading.view = view.exec;
     });
+    require(['lib/comment-show']);
