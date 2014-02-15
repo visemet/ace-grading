@@ -25,11 +25,6 @@ define(function(require, exports, module) {
   editor.setReadOnly(true);
   editor.setShowFoldWidgets(false);
 
-  // Resize the editor when the window is resized
-  $(window).resize(function() {
-    editor.resize();
-  });
-
   exports.exec = function(file) {
 
     /**
@@ -54,18 +49,24 @@ define(function(require, exports, module) {
 
       // Seek back to the beginning of the file
       editor.navigateFileStart();
-
-      // Resize the editor DOM to fit the whole contents of the file
-      //   refer to http://stackoverflow.com/questions/1158406
-      (function() {
-        var renderer = editor.renderer
-          , height = session.getLength() * renderer.lineHeight
-                     + renderer.scrollBar.getWidth();
-
-        $('#editor').height(height);
-
-        editor.resize();
-      })();
     }, 'json');
   };
+
+  // Resize the editor when the window is resized
+  $(window).resize(function() {
+    // Note that we cannot use $(document).height() to compute the
+    // height of the document because this will return the height
+    // of the window if the page content is smaller than the viewport
+    var windowHeight = $(window).height()
+      , documentHeight = document.body.clientHeight
+      , diff = windowHeight - documentHeight;
+
+    $('#editor').height($('#editor').height() + diff);
+    $('#comments').height($('#comments').height() + diff);
+
+    editor.resize();
+  });
+
+  // Fill the remaining space of the document with the editor
+  $(window).resize();
 });

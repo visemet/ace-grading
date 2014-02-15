@@ -4,12 +4,15 @@ append css
   style(type='text/css', media='screen').
     #editor {
       position: relative; /* must be relative */
-      height: 450px;
+      height: 240px;
+      min-height: 240px;  /* ensure height is at least this large */
     }
 
     #comments {
       position: relative; /* must be relative */
-      height: 450px;
+      height: 240px;
+      min-height: 240px;  /* ensure height is at least this large */
+      overflow-y: hidden; /* hide comments past height */
     }
 
 block content

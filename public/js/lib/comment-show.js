@@ -110,6 +110,16 @@ define(function(require, exports, module) {
         align.below(lastIndex, $comments.children());
       });
     }
+
+    var lastScrollTop = session.getScrollTop();
+    session.on('changeScrollTop', function(scrollTop) {
+      var diff = scrollTop - lastScrollTop;
+
+      align.setOffset(scrollTop);
+      align.apply(-diff, $comments.children()); // minus for direction
+
+      lastScrollTop = scrollTop;
+    });
   })();
 
   /**
