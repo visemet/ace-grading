@@ -93,6 +93,7 @@ define(function(require, exports, module) {
       $comment.click(function() {
         editor.clearSelection();
         editor.moveCursorTo(startLine, startPos);
+        editor.focus();
       });
 
       $comments.append($comment);
