@@ -15,16 +15,7 @@ define(function(require, exports, module) {
 
   var $ = require('jquery');
 
-  var PADDING = 12 // leave some space between comments
-    , offset = 0;
-
-  /**
-   * Sets the vertical offset of the comments, which occurs due to
-   * scrolling the editor.
-   */
-  exports.setOffset = function(newOffset) {
-    offset = newOffset;
-  };
+  var PADDING = 12; // leave some space between comments
 
   /**
    * Shifts each comment by the specified amount, either up or down
@@ -52,7 +43,9 @@ define(function(require, exports, module) {
   /**
    * Moves the specified to comment to its preferred position.
    */
-  exports.move = function(index, $comments) {
+  exports.move = function(index, $comments, offset0) {
+    var offset = offset0 || 0;
+
     var $comment = $comments.eq(index);
 
     var preferredTop = $comment.data('preferred-top') - offset
@@ -74,7 +67,9 @@ define(function(require, exports, module) {
    * comment by moving them as far down as possible, or as much they
    * prefer.
    */
-  exports.above = function(index, $comments) {
+  exports.above = function(index, $comments, offset0) {
+    var offset = offset0 || 0;
+
     var $comment = $comments.eq(index)
       , i;
 
@@ -100,7 +95,9 @@ define(function(require, exports, module) {
    * comment by moving them as far up as possible, or as much they
    * prefer.
    */
-  exports.below = function(index, $comments) {
+  exports.below = function(index, $comments, offset0) {
+    var offset = offset0 || 0;
+
     var $comment = $comments.eq(index), $prev = $comment
       , i, length = $comments.length;
 
