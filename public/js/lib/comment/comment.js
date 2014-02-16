@@ -59,6 +59,7 @@ define(function(require, exports, module) {
     this.range = new Range(startRow, startColumn, endRow, endColumn);
 
     this.selected = false;
+    this.index = null; // for use in comment-vm/list
   };
 
   (function() {
@@ -131,6 +132,21 @@ define(function(require, exports, module) {
      */
     this.isSelected = function() {
       return this.selected;
+    };
+
+    /**
+     * Returns the index of the comment within a list. Note that a
+     * comment may only be in one list at a time.
+     *
+     * @returns {Number|null} The index of the comment within a list,
+     *    or `null` if not in any list
+     *
+     * @memberof Comment
+     * @instance
+     * @method getIndex
+     */
+    this.getIndex = function() {
+      return this.index;
     };
 
   }).call(Comment.prototype);

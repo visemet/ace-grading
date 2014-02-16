@@ -73,7 +73,7 @@ define(function(require, exports, module) {
       var session = this.editor.getSession()
         , lastScrollTop = session.getScrollTop();
 
-      comments.forEach(function(comment, index) {
+      comments.forEach(function(comment) {
         var range = comment.range;
 
         var $comment = $(['<div class="panel panel-default">',
@@ -95,6 +95,7 @@ define(function(require, exports, module) {
           handleBoxHighlight($comment, selected);
 
           if (selected) {
+            var index = comment.getIndex();
             if (align.move(index, $dom.children(), lastScrollTop)) {
               align.above(index, $dom.children(), lastScrollTop);
               align.below(index, $dom.children(), lastScrollTop);
@@ -133,7 +134,7 @@ define(function(require, exports, module) {
         });
 
         $dom.append($comment);
-        align.move(index, $dom.children(), lastScrollTop);
+        align.move(comment.getIndex(), $dom.children(), lastScrollTop);
       });
 
       if (comments.length >= 0) {

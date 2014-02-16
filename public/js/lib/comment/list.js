@@ -98,7 +98,10 @@ define(function(require, exports, module) {
      */
     this.addComment = function(comment) {
       var index = sortedIndex(this.list, comment);
+
       this.list.splice(index, 0, comment);
+      comment.index = index;
+
       this._signal('addComment', index);
     };
 
@@ -119,6 +122,8 @@ define(function(require, exports, module) {
       }
 
       this.list.splice(index, 1);
+      comment.index = null;
+
       this._signal('removeComment', index);
     };
 
