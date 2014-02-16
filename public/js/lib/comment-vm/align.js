@@ -15,14 +15,26 @@ define(function(require, exports, module) {
 
   var $ = require('jquery');
 
-  var PADDING = 12; // leave some space between comments
+  /**
+   * A module to manage the alignment of a list of comments.
+   * @module comment-vm/align
+   */
 
   /**
-   * Shifts each comment by the specified amount, either up or down
-   * depending on whether the given is negative or positive,
-   * respectively.
+   * The amount of padding to leave between comments.
    *
-   * Note that the delta is already relative to the offset.
+   * @constant {Number}
+   * @private
+   */
+  var PADDING = 12;
+
+  /**
+   * Shifts each comment of the list by the specified amount `delta`,
+   * either up or down, depending on whether the value is negative or
+   * positive, respectively.
+   *
+   * @param {Number} delta The number of pixels to shift all comments by
+   * @param {Array} $comments
    */
   exports.apply = function(delta, $comments) {
     $comments.each(function(index, value) {
@@ -41,7 +53,15 @@ define(function(require, exports, module) {
   };
 
   /**
-   * Moves the specified to comment to its preferred position.
+   * Moves the comment specified by `index` to its preferred (vertical)
+   * position.
+   *
+   * @param {Number} index The index of the comment to move
+   * @param {Array} $comments
+   * @param {Number} [offset=0] The (vertical) relative offset
+   *
+   * @returns {boolean} `true` if the comment was moved, and `false`
+   *    otherwise
    */
   exports.move = function(index, $comments, offset0) {
     var offset = offset0 || 0;
@@ -63,9 +83,14 @@ define(function(require, exports, module) {
   };
 
   /**
-   * Adjusts the position of all the comments above the specified
-   * comment by moving them as far down as possible, or as much they
-   * prefer.
+   * Adjusts the position of all the comments above the comment
+   * specified by `index` by moving them as far down as possible, or as
+   * much they prefer.
+   *
+   * @param {Number} index The index for which all preceeding comments
+   *    should be moved
+   * @param {Array} $comments
+   * @param {Number} [offset=0] The (vertical) relative offset
    */
   exports.above = function(index, $comments, offset0) {
     var offset = offset0 || 0;
@@ -91,9 +116,14 @@ define(function(require, exports, module) {
   };
 
   /**
-   * Adjusts the position of all the comments below the specified
-   * comment by moving them as far up as possible, or as much they
-   * prefer.
+   * Adjusts the position of all the comments below the comment
+   * specified by `index` by moving them as far up as possible, or as
+   * much they prefer.
+   *
+   * @param {Number} index The index for which all following comments
+   *    should be moved
+   * @param {Array} $comments
+   * @param {Number} [offset=0] The (vertical) relative offset
    */
   exports.below = function(index, $comments, offset0) {
     var offset = offset0 || 0;
