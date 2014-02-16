@@ -34,6 +34,15 @@ define(function(require, exports, module) {
    */
 
   /**
+   * Emitted when the status of whether the comment is selected changes,
+   * via {@link Comment#select} and {@link Comment#deselect}.
+   *
+   * @event Comment#changeSelected
+   *
+   * @param {boolean} selected Whether the comment is selected or not
+   */
+
+  /**
    * Creates a new `Comment` object with the given text and the
    * specified range the comment applies to.
    *
@@ -48,6 +57,8 @@ define(function(require, exports, module) {
   var Comment = function(text, startRow, startColumn, endRow, endColumn) {
     this.text = text;
     this.range = new Range(startRow, startColumn, endRow, endColumn);
+
+    this.selected = false;
   };
 
   (function() {
@@ -80,6 +91,46 @@ define(function(require, exports, module) {
      */
     this.getText = function() {
       return this.text;
+    };
+
+    /**
+     * Selects the comment. This function also emits the
+     * `'changeSelected'` event.
+     *
+     * @memberof Comment
+     * @instance
+     * @method select
+     */
+    this.select = function() {
+      this.selected = true;
+      this._signal('changeSelected', this.selected);
+    };
+
+    /**
+     * Deselects the comment. This function also emits the
+     * `'changeSelected'` event.
+     *
+     * @memberof Comment
+     * @instance
+     * @method deselect
+     */
+    this.deselect = function() {
+      this.selected = false;
+      this._signal('changeSelected', this.selected);
+    };
+
+    /**
+     * Returns whether the comment is selected or not.
+     *
+     * @returns {boolean} `true` if the comment is selected, and `false`
+     *    otherwise
+     *
+     * @memberof Comment
+     * @instance
+     * @method isSelected
+     */
+    this.isSelected = function() {
+      return this.selected;
     };
 
   }).call(Comment.prototype);
