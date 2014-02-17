@@ -102,6 +102,11 @@ define(function(require, exports, module) {
       this.list.splice(index, 0, comment);
       comment.index = index;
 
+      for (var i = index + 1; i < this.list.length; i++) {
+        var c = this.list[i];
+        c.index += 1;
+      }
+
       this._signal('addComment', index);
     };
 
@@ -123,6 +128,11 @@ define(function(require, exports, module) {
 
       this.list.splice(index, 1);
       comment.index = null;
+
+      for (var i = index; i < this.list.length; i++) {
+        var c = this.list[i];
+        c.index -= 1;
+      }
 
       this._signal('removeComment', index);
     };
