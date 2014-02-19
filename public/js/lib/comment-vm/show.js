@@ -45,6 +45,19 @@ define(function(require, exports, module) {
     this.editor = editor;
     this.comments = comments;
 
+    this.markers = [];
+
+    this.$onAddComment = this.onAddComment.bind(this);
+    this.$onRemoveComment = this.onRemoveComment.bind(this);
+
+    this.$onChangeScrollTop = this.onChangeScrollTop.bind(this);
+    this.$onChangeCursor = this.onChangeCursor.bind(this);
+
+    this.$onWindowResize = this.onWindowResize.bind(this);
+
+    this.comments.on('addComment', this.$onAddComment);
+    this.comments.on('removeComment', this.$onRemoveComment);
+
     // Turn off the highlighting on the active line since it distracts
     // from the commented sections of code
     editor.setHighlightActiveLine(false);
@@ -63,102 +76,228 @@ define(function(require, exports, module) {
      * @method display
      */
     this.display = function(dom) {
-      var $dom = $(dom);
+      var editor = this.editor
+        , comments = this.comments.list;
+
+      var session = editor.getSession()
+        , selection = session.getSelection();
+
+      this.$dom = $(dom);
+      this.lastScrollTop = session.getScrollTop();
+
+      $(comments).each(this.$onAddComment);
+
+      $(window).resize(this.$onWindowResize);
+
+      session.on('changeScrollTop', this.$onChangeScrollTop);
+      selection.on('changeCursor', this.$onChangeCursor);
+    };
+
+    /**
+     * Inserts a new comment box into the previously specified DOM when
+     * a comment is added to the list of comments. Also adds a marker
+     * for the section of code the comment applies to.
+     *
+     * @param {Number} index The index of the added comment
+     *
+     * @memberof module:comment-vm/show#Environment
+     * @instance
+     * @method onAddComment
+     */
+    this.onAddComment = function(index) {
+      var $dom = this.$dom;
+
+      // Only need to add comments if display() was called
+      if (!$dom) {
+        return;
+      }
 
       var editor = this.editor
         , comments = this.comments.list;
 
-      var renderer = this.editor.renderer;
+      var renderer = editor.renderer
+        , session = editor.getSession()
+        , selection = session.getSelection();
 
-      var session = this.editor.getSession()
-        , lastScrollTop = session.getScrollTop();
+      var comment = comments[index]
+        , range = comment.range;
 
-      comments.forEach(function(comment) {
-        var range = comment.range;
+      var $comment = $(['<div class="panel panel-default">',
+                        '  <div class="panel-body" />',
+                        '</div>'].join('\n'))
+        , $commentBody = $comment.children('.panel-body');
 
-        var $comment = $(['<div class="panel panel-default">',
-                          '  <div class="panel-body" />',
-                          '</div>'].join('\n'));
+      $comment.addClass('comment-box');
 
-        $comment.addClass('comment-box');
+      var height = range.start.row * renderer.lineHeight;
+      $comment.data('preferred-top', height);
 
-        var height = range.start.row * renderer.lineHeight;
-        $comment.data('preferred-top', height);
-        $comment.find('.panel-body').text(comment.getText());
-
-        comment.on('changeText', function(text) {
-          $comment.find('.panel-body').text(text);
-        });
-
-        comment.on('changeSelected', function(selected) {
-          handleCodeHighlight(marker, selected);
-          handleBoxHighlight($comment, selected);
-
-          if (selected) {
-            var index = comment.getIndex();
-            if (align.move(index, $dom.children(), lastScrollTop)) {
-              align.above(index, $dom.children(), lastScrollTop);
-              align.below(index, $dom.children(), lastScrollTop);
-            }
-          }
-        });
-
-        // Highlight the commented section of code
-        var markerId = session.addMarker(range, 'comment-code', 'line', false)
-          , marker = session.getMarkers(false)[markerId];
-
-        // Register a handler on the editor for when the cursor position
-        // changes
-        var selection = session.getSelection();
-        selection.on('changeCursor', function() {
-          var cursorPos = function(pos) {
-            return { line: pos.row, pos: pos.column };
-          }(selection.getCursor());
-
-          if (range.contains(cursorPos.line, cursorPos.pos)) {
-            comment.select();
-          } else {
-            comment.deselect();
-          }
-
-          renderer.updateBackMarkers();
-        });
-
-        // Register a click handler on the comment box in order to move
-        // the cursor to the commented section of code, which then invokes
-        // that handler
-        $comment.click(function() {
-          editor.clearSelection();
-          editor.moveCursorTo(range.start.row, range.start.column);
-          editor.focus();
-        });
-
-        $dom.append($comment);
-        align.move(comment.getIndex(), $dom.children(), lastScrollTop);
+      $commentBody.text(comment.getText());
+      comment.on('changeText', function(text) {
+        $commentBody.text(text);
       });
 
-      if (comments.length >= 0) {
-        align.below(0, $dom.children(), lastScrollTop);
+      // Highlight the commented section of code
+      var markerId = session.addMarker(range, 'comment-code', 'line', false)
+        , marker = session.getMarkers(false)[markerId];
 
-        // Handle realigning the comments when the window size changes
-        // because the comment box heights may have changed
-        $(window).resize(function() {
-          comments.forEach(function(comment, index) {
-            if (comment.isSelected()) {
-              align.move(index, $dom.children(), lastScrollTop);
-              align.above(index, $dom.children(), lastScrollTop);
-              align.below(index, $dom.children(), lastScrollTop);
-            }
-          });
-        });
+      this.markers.splice(index, 0, marker);
+
+      comment.on('changeSelected', (function(selected) {
+        handleCodeHighlight(marker, selected);
+        handleBoxHighlight($comment, selected);
+
+        if (selected) {
+          var newIndex = comment.getIndex()
+            , $comments = $dom.children('.comment-box')
+            , offset = this.lastScrollTop;
+
+          if (align.move(newIndex, $comments, offset)) {
+            align.above(newIndex, $comments, offset);
+            align.below(newIndex, $comments, offset);
+          }
+        }
+      }).bind(this));
+
+      // Register a click handler on the comment box in order to move
+      // the cursor to the commented section of code, which then invokes
+      // that handler
+      $comment.click(function() {
+        editor.clearSelection();
+        editor.moveCursorTo(range.start.row, range.start.column);
+        editor.focus();
+      });
+
+      (function(offset) {
+        var $comments = $dom.children('.comment-box');
+
+        if (index === 0) {
+          $dom.prepend($comment);
+        } else {
+          $comments.eq(index - 1).after($comment);
+        }
+
+        $comments = $dom.children('.comment-box');
+
+        align.move(index, $comments, offset);
+        align.above(index, $comments, offset);
+        align.below(index, $comments, offset);
+      })(this.lastScrollTop);
+    };
+
+    /**
+     * Deletes the comment box from the previously specified DOM when a
+     * comment is removed from the list of comments. Also removes the
+     * marker from the section of code the comment applied to.
+     *
+     * @param {Number} index The index of the removed comment
+     *
+     * @memberof module:comment-vm/show#Environment
+     * @instance
+     * @method onRemoveComment
+     */
+    this.onRemoveComment = function(index) {
+      var $dom = this.$dom;
+
+      // Only need to remove comments if display() was called
+      if (!$dom) {
+        return;
       }
 
-      session.on('changeScrollTop', function(scrollTop) {
-        var diff = scrollTop - lastScrollTop;
+      var editor = this.editor
+        , session = editor.getSession();
 
-        align.apply(-diff, $dom.children()); // minus for direction
+      // Remove the comment box
+      $dom.children('.comment-box').eq(index).remove();
 
-        lastScrollTop = scrollTop;
+      // Remove the marker
+      var marker = this.markers.splice(index, 1)[0];
+      session.removeMarker(marker.id);
+    };
+
+    /**
+     * Handler for when the cursor within the editor changes in order to
+     * select and deselect comments appropriately.
+     *
+     * @memberof module:comment-vm/show#Environment
+     * @instance
+     * @method onChangeCursor
+     */
+    this.onChangeCursor = function() {
+      var editor = this.editor
+        , comments = this.comments.list;
+
+      var renderer = editor.renderer
+        , session = editor.getSession()
+        , selection = session.getSelection();
+
+      $(comments).each(function(index, comment) {
+        var range = comment.range;
+
+        // Checks if the cursor is within the commented section of code
+        if (range.comparePoint(selection.getCursor()) === 0) {
+          comment.select();
+        } else {
+          comment.deselect();
+        }
+      });
+
+      renderer.updateBackMarkers();
+    };
+
+    /**
+     * Handler for when the editor scrolls in order to maintain
+     * the relative alignment of comment boxes and lines of code.
+     *
+     * @param {Number} scrollTop The total amount the editor has been
+     *    scrolled
+     *
+     * @memberof module:comment-vm/show#Environment
+     * @instance
+     * @method onChangeScrollTop
+     */
+    this.onChangeScrollTop = function(scrollTop) {
+      var $dom = this.$dom;
+
+      // Only need to align comments if display() was called
+      if (!$dom) {
+        return;
+      }
+
+      var diff = scrollTop - this.lastScrollTop;
+      align.apply(-diff, $dom.children('.comment-box')); // minus for direction
+
+      this.lastScrollTop = scrollTop;
+    };
+
+    /**
+     * Handler for when the window resizes in order to maintain
+     * alignment of the selected comment box, as well as padding
+     * between all of the comment boxes.
+     *
+     * @memberof module:comment-vm/show#Environment
+     * @instance
+     * @method onWindowResize
+     */
+    this.onWindowResize = function() {
+      var $dom = this.$dom;
+
+      // Only need to realign comments if display() was called
+      if (!$dom) {
+        return;
+      }
+
+      var comments = this.comments.list
+        , lastScrollTop = this.lastScrollTop;
+
+      // Realign all of the comments when the window size changes
+      // because the comment box heights may have changed
+      $(comments).each(function(index, comment) {
+        if (comment.isSelected() || index === 0) {
+          align.move(index, $dom.children('.comment-box'), lastScrollTop);
+          align.above(index, $dom.children('.comment-box'), lastScrollTop);
+          align.below(index, $dom.children('.comment-box'), lastScrollTop);
+        }
       });
     };
 
@@ -167,6 +306,9 @@ define(function(require, exports, module) {
   /**
    * Toggles whether the marker overlay is highlighted based on whether
    * the cursor is within the commented section of code.
+   *
+   * @memberof module:comment-vm/show
+   * @function
    */
   function handleCodeHighlight(marker, withinComment) {
     if (withinComment) {
@@ -179,6 +321,9 @@ define(function(require, exports, module) {
   /**
    * Toggles whether the comment box is highlighted based on whether
    * the cursor is within the commented section of code.
+   *
+   * @memberof module:comment-vm/show
+   * @function
    */
   function handleBoxHighlight($comment, withinComment) {
     if (withinComment) {
