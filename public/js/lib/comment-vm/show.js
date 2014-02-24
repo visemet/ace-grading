@@ -124,10 +124,13 @@ define(function(require, exports, module) {
 
       var $comment = $(['<div class="panel panel-default">',
                         '  <div class="panel-body" />',
+                        '  <div class="panel-footer" />',
                         '</div>'].join('\n'))
-        , $commentBody = $comment.children('.panel-body');
+        , $commentBody = $comment.children('.panel-body')
+        , $commentFooter = $comment.children('.panel-footer');
 
       $comment.addClass('comment-box');
+      $commentFooter.addClass('comment-box-footer');
 
       var height = range.start.row * renderer.lineHeight;
       $comment.data('preferred-top', height);
