@@ -331,10 +331,10 @@ define(function(require, exports, module) {
   function handleBoxHighlight($comment, withinComment) {
     if (withinComment) {
       $comment.addClass('comment-box-highlighted');
-      $comment.css('left', 0);
+      $comment.css({ left: 0, marginRight: 10 });
     } else {
       $comment.removeClass('comment-box-highlighted');
-      $comment.css('left', 10);
+      $comment.css({ left: 10, marginRight: 0 });
     }
   };
 

@@ -43,12 +43,6 @@ define(function(require, exports, module) {
         , shiftedTop = currentTop + delta;
 
       $comment.css('top', shiftedTop);
-
-      if (shiftedTop < 0) {
-        $comment.hide();
-      } else {
-        $comment.show();
-      }
     });
   };
 
@@ -72,12 +66,6 @@ define(function(require, exports, module) {
       , currentTop = parseInt($comment.css('top'), 10);
 
     $comment.css('top', preferredTop);
-
-    if (preferredTop < 0) {
-      $comment.hide();
-    } else {
-      $comment.show();
-    }
 
     return (!$.isNumeric(currentTop) || preferredTop !== currentTop);
   };
@@ -106,12 +94,6 @@ define(function(require, exports, module) {
       // Move comment down as far as possible, or much as preferred
       extent = Math.min(preferredTop, extent - $c.height() - PADDING);
       $c.css('top', extent);
-
-      if (extent < 0) {
-        $c.hide();
-      } else {
-        $c.show();
-      }
     }
   };
 
