@@ -136,6 +136,7 @@ define(function(require, exports, module) {
       $comment.data('preferred-top', height);
 
       $commentBody.text(comment.getText());
+      $commentBody.html($commentBody.html().replace(/\n/g, '<br />'));
 
       // Highlight the commented section of code
       var markerId = session.addMarker(range, 'comment-code', 'line', false)
