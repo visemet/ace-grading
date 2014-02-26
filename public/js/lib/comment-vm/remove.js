@@ -56,7 +56,13 @@ define(function(require, exports, module) {
       , $comment = $comments.eq(index)
       , $commentFooter = $comment.children('.comment-box-footer');
 
-    var $remove = $('<a href="#"><small>Delete</small></a>');
+    var $remove = $('<button type="button" class="btn" />');
+
+    $remove.addClass('btn-danger btn-xs');
+    $remove.text('Delete');
+
+    $remove.css({ marginLeft: 4, marginRight: 4 });
+
     $remove.click(function() {
       comments.removeComment(comment);
     });
