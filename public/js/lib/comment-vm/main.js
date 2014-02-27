@@ -25,7 +25,8 @@ define(function(require, exports, module) {
 
   var Environment = require('lib/comment-vm/show').Environment;
 
-  var remove = require('lib/comment-vm/remove');
+  var edit = require('lib/comment-vm/edit')
+    , remove = require('lib/comment-vm/remove');
 
   // TODO: Retrieve the list of comments
   var comments = new List()
@@ -33,5 +34,6 @@ define(function(require, exports, module) {
 
   env.display($comments);
 
+  edit.init(env);
   remove.init(env);
 });

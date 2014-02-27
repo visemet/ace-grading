@@ -7,9 +7,13 @@
   background-color: #ffe572;
 }
 
+/* Refer to http://stackoverflow.com/questions/5750559 */
+.comment-box-body[contenteditable=true]:focus {
+  outline: none;
+}
+
 .comment-box-footer {
-  padding-top: 5px;
-  padding-bottom: 5px;
+  padding: 5px;
 }
 
 .comment-code {

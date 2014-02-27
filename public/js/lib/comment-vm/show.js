@@ -130,6 +130,7 @@ define(function(require, exports, module) {
         , $commentFooter = $comment.children('.panel-footer');
 
       $comment.addClass('comment-box');
+      $commentBody.addClass('comment-box-body');
       $commentFooter.addClass('comment-box-footer');
 
       var height = range.start.row * renderer.lineHeight;
